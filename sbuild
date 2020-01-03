@@ -34,7 +34,7 @@ def json_expandvars(o):
 
 # Parse command line arguments
 parser = argparse.ArgumentParser(description='Command line builder')
-parser.add_argument("--json", default="build.json", type=str, help="set builder json file")
+parser.add_argument("--json", default="sbuild.json", type=str, help="set builder json file")
 parser.add_argument("--check", default=1, type=int, help="timeout process check")
 
 args = parser.parse_args()
