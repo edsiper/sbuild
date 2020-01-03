@@ -6,7 +6,7 @@ A simple Python script to run jobs defined in a JSON file.
 
 ## Jobs definition
 
-The following content can be set in _build.json_ file:
+The following content can be set in _sbuild.json_ file:
 
 ```json
 {
@@ -46,7 +46,7 @@ The following content can be set in _build.json_ file:
     }
     ```
 
-  - Run it as: $ VERSION=0.1 ./sbuild --json build.json
+  - Run it as: $ VERSION=0.1 ./sbuild --json sbuild.json
 
 ## Example
 

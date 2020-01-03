@@ -65,6 +65,7 @@ log_kv_info("Logs Dir", format(log_dir))
 # Process Jobs
 i = 0
 jobs = []
+logs = []
 for j in data['jobs']:
     jt = 'Job %i' % i
     log_kv_info(jt, j['name'])
@@ -72,6 +73,7 @@ for j in data['jobs']:
     # Log file
     f_stdout = "%s/%s.log" % (log_dir, j['name'].replace('/', '_'))
     f = open(f_stdout, "w+")
+    logs.append(f_stdout)
 
     # Spawn the runner
     cmd = shlex.split(j['exec'])
@@ -109,3 +111,9 @@ while len(jobs) > 0:
     time.sleep(process_check)
 
 log_kv_info("Status Check", "all jobs have finished (%i/%i passed)" % (passed, total))
+
+i = 0
+for log in logs:
+    jt = 'Job %i log' % i
+    log_kv_info(jt, log)
+    i = i + 1
