@@ -85,7 +85,8 @@ for j in data['jobs']:
     jobs.append({'id': i, 'name': j['name'],
                  'process': process,
                  'log': f,
-                 'log_file': f_stdout})
+                 'log_file': f_stdout,
+                 'time_start': time.time()})
     i = i + 1
 
 log_kv_info("Status Check", "every %i second(s)" % process_check)
@@ -103,8 +104,9 @@ while len(jobs) > 0:
             else:
                 color = bcolors.FAIL
 
-            log_kv_info(jt, "%s%s has finished, status code = %i%s" %
-                        (color, j['name'], j['process'].returncode, bcolors.ENDC))
+            elapsed = time.time() - j['time_start']
+            log_kv_info(jt, "%s%s has finished, elapsed time = %i second(s), status code = %i%s" %
+                        (color, j['name'], elapsed, j['process'].returncode, bcolors.ENDC))
             j['log'].close()
             jobs.remove(j)
 
