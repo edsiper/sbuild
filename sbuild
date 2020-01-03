@@ -22,6 +22,12 @@ class bcolors:
 def log_kv_info(key, value):
     logging.info("%12s: %s", key, value)
 
+def hms_string(sec_elapsed):
+    h = int(sec_elapsed / (60 * 60))
+    m = int((sec_elapsed % (60 * 60)) / 60)
+    s = sec_elapsed % 60.
+    return "{}:{:>02}:{:>05.2f}".format(h, m, s)
+
 def json_expandvars(o):
     if isinstance(o, dict):
        return {json_expandvars(k): json_expandvars(v) for k, v in o.items()}
@@ -105,8 +111,8 @@ while len(jobs) > 0:
                 color = bcolors.FAIL
 
             elapsed = time.time() - j['time_start']
-            log_kv_info(jt, "%s%s has finished, elapsed time = %i second(s), status code = %i%s" %
-                        (color, j['name'], elapsed, j['process'].returncode, bcolors.ENDC))
+            log_kv_info(jt, "%s%s has finished, elapsed time = %s, status code = %i%s" %
+                        (color, j['name'], hms_string(elapsed), j['process'].returncode, bcolors.ENDC))
             j['log'].close()
             jobs.remove(j)
 
