@@ -1,0 +1,15 @@
+{
+    "pipeline": "sbuild-test",
+    "version": "0.1",
+    "log_dir": "logs",
+    "jobs": [
+        {
+            "name": "first ls",
+            "exec": "ls /tmp"
+        },
+        {
+            "name": "second ls",
+            "exec": "ls /proc"
+        }
+    ]
+}
