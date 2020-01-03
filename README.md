@@ -51,7 +51,7 @@ The following content can be set in _sbuild.json_ file:
 ## Example
 
 ```bash
-$ ./sbuild --json build.json
+$ VERSION=0.1 ./sbuild --json build.json
 2020-01-03 12:15:39,399 [    INFO]       Status: starting builder
 2020-01-03 12:15:39,399 [    INFO]     Pipeline: sbuild-test
 2020-01-03 12:15:39,400 [    INFO]      Version: 0.1
