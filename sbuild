@@ -1,0 +1,111 @@
+#!/usr/bin/env python
+
+import os
+import time
+import json
+import shlex
+import logging
+import argparse
+import subprocess
+from datetime import datetime
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+def log_kv_info(key, value):
+    logging.info("%12s: %s", key, value)
+
+def json_expandvars(o):
+    if isinstance(o, dict):
+       return {json_expandvars(k): json_expandvars(v) for k, v in o.items()}
+    elif isinstance(o, list):
+       return [json_expandvars(v) for v in o]
+    elif isinstance(o, basestring):
+       return os.path.expandvars(o)
+    else:
+       return o
+
+# Parse command line arguments
+parser = argparse.ArgumentParser(description='Command line builder')
+parser.add_argument("--json", default="build.json", type=str, help="set builder json file")
+parser.add_argument("--check", default=1, type=int, help="timeout process check")
+
+args = parser.parse_args()
+json_file = args.json
+process_check = args.check
+
+# Logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)8s] %(message)s')
+
+log_kv_info("Status", "starting builder")
+
+# Read JSON file
+with open(json_file) as json_file:
+    data = json_expandvars(json.load(json_file))
+
+# Log directory
+now = datetime.now()
+d = now.strftime("%Y-%m-%d-%H_%M_%S")
+log_dir = "%s/%s/%s/%s" % (data['log_dir'], data['pipeline'], data['version'], d)
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
+
+
+log_kv_info("Pipeline", format(data['pipeline']))
+log_kv_info("Version", format(data['version']))
+log_kv_info("Logs Dir", format(log_dir))
+
+# Process Jobs
+i = 0
+jobs = []
+for j in data['jobs']:
+    jt = 'Job %i' % i
+    log_kv_info(jt, j['name'])
+
+    # Log file
+    f_stdout = "%s/%s.log" % (log_dir, j['name'].replace('/', '_'))
+    f = open(f_stdout, "w+")
+
+    # Spawn the runner
+    cmd = shlex.split(j['exec'])
+    process = subprocess.Popen(cmd,
+                               preexec_fn=os.setpgrp,
+                               stdout=f,
+                               stderr=f,
+                               bufsize=0)
+    jobs.append({'id': i, 'name': j['name'],
+                 'process': process,
+                 'log': f,
+                 'log_file': f_stdout})
+    i = i + 1
+
+log_kv_info("Status Check", "every %i second(s)" % process_check)
+passed=0
+total=len(jobs)
+while len(jobs) > 0:
+    for j in jobs:
+        status = j['process'].poll()
+        jt = 'Job %i' % (j['id'])
+
+        if status is not None:
+            if j['process'].returncode == 0:
+                color = bcolors.OKGREEN
+                passed += 1
+            else:
+                color = bcolors.FAIL
+
+            log_kv_info(jt, "%s%s has finished, status code = %i%s" %
+                        (color, j['name'], j['process'].returncode, bcolors.ENDC))
+            j['log'].close()
+            jobs.remove(j)
+
+    time.sleep(process_check)
+
+log_kv_info("Status Check", "all jobs have finished (%i/%i passed)" % (passed, total))
