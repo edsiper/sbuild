@@ -9,6 +9,8 @@ import argparse
 import subprocess
 from datetime import datetime
 
+sbuild_log_file = None
+
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -46,6 +48,9 @@ parser.add_argument("--check", default=1, type=int, help="timeout process check"
 args = parser.parse_args()
 json_file = args.json
 process_check = args.check
+
+# Environment Variables
+os.environ["SBUILD_DATE"] = datetime.utcnow().strftime('%Y-%m-%d_%H_%M_%S')
 
 # Logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)8s] %(message)s')
